@@ -1,6 +1,4 @@
-from flask import Flask, render_template, request, jsonify
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,28 +6,34 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import chromedriver_autoinstaller
 import time
-
-app = Flask(__name__)
+import shutil
 
 def fetch_bse_result(company_name):
-    print(f"Searching for: {company_name}")
+    print(f"🔍 Searching for: {company_name}")
 
+    # 🛠 Ensure ChromeDriver is installed
     chromedriver_autoinstaller.install()
 
+    # Check if Chrome binary exists in common server location
+    chrome_path = shutil.which("google-chrome") or shutil.which("chromium-browser") or shutil.which("chromium")
+
+    if not chrome_path:
+        raise RuntimeError("No chrome executable found on PATH")
+
     options = Options()
+    options.binary_location = chrome_path
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
-    # options.binary_location = "/usr/bin/google-chrome"  # uncomment this if deploying on server
 
     driver = webdriver.Chrome(options=options)
     wait = WebDriverWait(driver, 10)
 
     try:
         driver.get("https://www.bseindia.com/corporates/Forth_Results.aspx")
-        print("Page loaded.")
+        print("✅ Page loaded.")
 
         search_box = wait.until(EC.visibility_of_element_located((By.ID, "scripsearchtxtbx")))
         search_box.clear()
@@ -43,7 +47,7 @@ def fetch_bse_result(company_name):
 
         submit_button = wait.until(EC.element_to_be_clickable((By.ID, "btnSubmit")))
         submit_button.click()
-        print("Submit clicked.")
+        print("🚀 Submit clicked.")
 
         rows = wait.until(EC.presence_of_all_elements_located((By.XPATH, "//tr[@ng-repeat='fr in forthresult']")))
         if rows:
@@ -58,24 +62,11 @@ def fetch_bse_result(company_name):
             return {"error": "The Result is not Announced yet!"}
 
     except Exception as e:
-        print(f"Exception: {e}")
+        print(f"❌ Exception: {e}")
         return {"error": f"Failed to fetch data: {str(e)}"}
 
     finally:
         try:
             driver.quit()
         except Exception as e:
-            print("Error closing browser:", e)
-
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-@app.route("/result", methods=["POST"])
-def get_result():
-    company = request.form["company"]
-    data = fetch_bse_result(company)
-    return render_template("result.html", data=data)
-
-if __name__ == "__main__":
-    app.run(debug=True)
+            print("⚠️ Error closing browser:", e)
