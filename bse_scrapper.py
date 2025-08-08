@@ -11,11 +11,7 @@ from selenium import webdriver
 
 options = webdriver.ChromeOptions()
 options.binary_location = "/usr/bin/google-chrome-stable"  # FULL PATH here
-options.add_argument("--headless")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
-
-driver = webdriver.Chrome(options=options)
+ driver = webdriver.Chrome(options=options)
 
 
 def fetch_bse_result(company_name):
@@ -31,14 +27,12 @@ def fetch_bse_result(company_name):
         raise RuntimeError("No chrome executable found on PATH")
 
     options = Options()
-    options.binary_location = chrome_path
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
 
-    driver = webdriver.Chrome(options=options)
     wait = WebDriverWait(driver, 10)
 
     try:
@@ -80,4 +74,5 @@ def fetch_bse_result(company_name):
             driver.quit()
         except Exception as e:
             print("⚠️ Error closing browser:", e)
+
 
