@@ -1,38 +1,29 @@
 import undetected_chromedriver as uc
-driver = uc.Chrome()
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from webdriver_manager.chrome import ChromeDriverManager
 import time
-import os
 
 def fetch_bse_result(company_name):
     print(f"Searching for: {company_name}")
 
-    options = Options()
+    options = uc.ChromeOptions()
+    options.binary_location = "/usr/bin/google-chrome"  # ✅ correct for Render
 
-    # ✅ Adjust this to the actual path of your Chromium binary on Render
-    options.binary_location = "/opt/render/project/.render/chrome"  # ← adjust if needed
-
-    # ✅ Headless and other flags needed for remote environments like Render
-    options.add_argument("--headless=new")  # Use new headless mode for Chrome 109+
+    # ✅ Headless setup
+    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-dev-tools")
     options.add_argument("--window-size=1920,1080")
+    options.add_argument("--disable-extensions")
 
-    # ✅ Logging and automation hiding
-    options.add_experimental_option("detach", False)
-    options.add_experimental_option("excludeSwitches", ["enable-logging", "enable-automation"])
+    # ✅ Avoid detection
+    options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
     options.page_load_strategy = 'eager'
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver = uc.Chrome(options=options)
     wait = WebDriverWait(driver, 10)
 
     try:
@@ -92,4 +83,3 @@ def fetch_bse_result(company_name):
         except Exception as e:
             print("Error closing browser:", e)
         print("✅ Chrome closed properly")
-
