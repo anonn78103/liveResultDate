@@ -5,15 +5,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
 import time
-import os
-import subprocess
 
 def fetch_bse_result(company_name):
-    stock_search_term = expected_company_name = company_name
     print(f"Searching for: {company_name}")
-
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
     options = Options()
     options.add_experimental_option("detach", False)
@@ -27,10 +23,8 @@ def fetch_bse_result(company_name):
     options.add_argument("--window-size=1920,1080")
     options.page_load_strategy = 'eager'
 
-    driver = webdriver.Chrome(service=Service(), options=options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     wait = WebDriverWait(driver, 10)
-
-    selected_company_text = None
 
     try:
         driver.get("https://www.bseindia.com/corporates/Forth_Results.aspx")
@@ -38,16 +32,18 @@ def fetch_bse_result(company_name):
 
         search_box = wait.until(EC.visibility_of_element_located((By.ID, "scripsearchtxtbx")))
         search_box.clear()
-        for ch in stock_search_term:
+        for ch in company_name:
             search_box.send_keys(ch)
             time.sleep(0.15)
         print("Search term entered.")
 
-        # Wait for dropdown
-        wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".quotemenu")))
-        # Select from dropdown using arrow + enter
-        search_box.send_keys(Keys.DOWN)
-        search_box.send_keys(Keys.ENTER)
+        try:
+            wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".quotemenu")))
+            search_box.send_keys(Keys.DOWN)
+            search_box.send_keys(Keys.ENTER)
+        except Exception as e:
+            print("Dropdown issue:", e)
+            return {"error": "Company dropdown not found or failed to select"}
 
         submit_button = wait.until(EC.element_to_be_clickable((By.ID, "btnSubmit")))
         submit_button.click()
@@ -66,7 +62,7 @@ def fetch_bse_result(company_name):
             columns = rows[0].find_elements(By.CLASS_NAME, "tdcolumn")
             print(f"Columns: {[c.text for c in columns]}")
             return {
-                "company": expected_company_name,
+                "company": company_name,
                 "security_code": columns[0].text.strip(),
                 "security_name": columns[1].text.strip(),
                 "result_date": columns[2].text.strip(),
@@ -76,7 +72,7 @@ def fetch_bse_result(company_name):
             }
         else:
             return {
-                "error": "The Result is not Announced yet! control ;) "
+                "error": "The Result is not Announced yet!"
             }
 
     except Exception as e:
@@ -85,12 +81,8 @@ def fetch_bse_result(company_name):
 
     finally:
         try:
-            tasks = subprocess.check_output("tasklist").decode().lower()
-            if "chromedriver.exe" in tasks:
-                os.system("taskkill /f /im chromedriver.exe")
-            if "chrome.exe" in tasks:
-                os.system("taskkill /f /im chrome.exe")
+            driver.quit()
         except Exception as e:
-            print("Error checking/killing processes:", e)
+            print("Error closing browser:", e)
 
         print("✅ Chrome closed properly")
