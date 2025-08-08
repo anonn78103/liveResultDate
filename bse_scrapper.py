@@ -7,6 +7,16 @@ from selenium.webdriver.common.keys import Keys
 import chromedriver_autoinstaller
 import time
 import shutil
+from selenium import webdriver
+
+options = webdriver.ChromeOptions()
+options.binary_location = "/usr/bin/google-chrome-stable"  # FULL PATH here
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+driver = webdriver.Chrome(options=options)
+
 
 def fetch_bse_result(company_name):
     print(f"🔍 Searching for: {company_name}")
@@ -70,3 +80,4 @@ def fetch_bse_result(company_name):
             driver.quit()
         except Exception as e:
             print("⚠️ Error closing browser:", e)
+
