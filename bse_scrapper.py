@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import chromedriver_autoinstaller
 import time
+chrome_options.binary_location = "/usr/bin/google-chrome"
 
 def fetch_bse_result(company_name):
     print(f"Searching for: {company_name}")
@@ -63,3 +64,4 @@ def fetch_bse_result(company_name):
             driver.quit()
         except Exception as e:
             print("Error closing browser:", e)
+
