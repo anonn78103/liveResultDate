@@ -13,14 +13,20 @@ def fetch_bse_result(company_name):
     print(f"Searching for: {company_name}")
 
     options = Options()
-    options.binary_location = "/usr/bin/google-chrome"  # Important for Render
-    options.add_argument("--headless")
+
+    # ✅ Adjust this to the actual path of your Chromium binary on Render
+    options.binary_location = "/opt/render/project/.render/chrome"  # ← adjust if needed
+
+    # ✅ Headless and other flags needed for remote environments like Render
+    options.add_argument("--headless=new")  # Use new headless mode for Chrome 109+
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
-    options.add_argument("--disable-dev-tools")
     options.add_argument("--disable-extensions")
+    options.add_argument("--disable-dev-tools")
     options.add_argument("--window-size=1920,1080")
+
+    # ✅ Logging and automation hiding
     options.add_experimental_option("detach", False)
     options.add_experimental_option("excludeSwitches", ["enable-logging", "enable-automation"])
     options.page_load_strategy = 'eager'
@@ -73,9 +79,7 @@ def fetch_bse_result(company_name):
                 }
             }
         else:
-            return {
-                "error": "The Result is not Announced yet!"
-            }
+            return {"error": "The Result is not Announced yet!"}
 
     except Exception as e:
         print(f"Exception: {e}")
@@ -86,5 +90,4 @@ def fetch_bse_result(company_name):
             driver.quit()
         except Exception as e:
             print("Error closing browser:", e)
-
         print("✅ Chrome closed properly")
