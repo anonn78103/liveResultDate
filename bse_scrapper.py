@@ -7,20 +7,22 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+import os
 
 def fetch_bse_result(company_name):
     print(f"Searching for: {company_name}")
 
     options = Options()
-    options.add_experimental_option("detach", False)
-    options.add_experimental_option("excludeSwitches", ["enable-logging", "enable-automation"])
-    options.add_argument("--disable-dev-shm-usage")
+    options.binary_location = "/usr/bin/google-chrome"  # Important for Render
+    options.add_argument("--headless")
     options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-tools")
     options.add_argument("--disable-extensions")
-    options.add_argument("--headless")
     options.add_argument("--window-size=1920,1080")
+    options.add_experimental_option("detach", False)
+    options.add_experimental_option("excludeSwitches", ["enable-logging", "enable-automation"])
     options.page_load_strategy = 'eager'
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
