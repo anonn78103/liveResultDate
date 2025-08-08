@@ -1,4 +1,5 @@
-from selenium import webdriver
+import undetected_chromedriver as uc
+driver = uc.Chrome()
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -91,3 +92,4 @@ def fetch_bse_result(company_name):
         except Exception as e:
             print("Error closing browser:", e)
         print("✅ Chrome closed properly")
+
