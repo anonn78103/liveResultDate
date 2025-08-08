@@ -1,5 +1,7 @@
 Flask
+undetected-chromedriver
 flask-cors
 selenium
 webdriver-manager
 gunicorn
+
