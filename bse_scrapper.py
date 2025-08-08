@@ -1,3 +1,4 @@
+from flask import Flask, render_template, request, jsonify
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -7,20 +8,21 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import chromedriver_autoinstaller
 import time
-chrome_options.binary_location = "/usr/bin/google-chrome"
+
+app = Flask(__name__)
 
 def fetch_bse_result(company_name):
     print(f"Searching for: {company_name}")
 
-    # 🔧 Auto-install ChromeDriver
     chromedriver_autoinstaller.install()
 
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920,1080")
+    options.add_argument('--disable-gpu')
+    options.add_argument('--window-size=1920,1080')
+    # options.binary_location = "/usr/bin/google-chrome"  # uncomment this if deploying on server
 
     driver = webdriver.Chrome(options=options)
     wait = WebDriverWait(driver, 10)
@@ -65,3 +67,15 @@ def fetch_bse_result(company_name):
         except Exception as e:
             print("Error closing browser:", e)
 
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/result", methods=["POST"])
+def get_result():
+    company = request.form["company"]
+    data = fetch_bse_result(company)
+    return render_template("result.html", data=data)
+
+if __name__ == "__main__":
+    app.run(debug=True)
